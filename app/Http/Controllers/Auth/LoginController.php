@@ -54,6 +54,20 @@ class LoginController extends Controller
             'username' => [trans('auth.failed')],
         ]);
     }
+
+    /**
+     * The user has been authenticated.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  mixed  $user
+     * @return mixed
+     */
+    protected function authenticated(Request $request, $user)
+    {
+        $token = auth('api')->login($user);
+        return redirect()->intended(RouteServiceProvider::HOME)
+                ->header('X-Token', $token);
+    }
     
 
     /**
