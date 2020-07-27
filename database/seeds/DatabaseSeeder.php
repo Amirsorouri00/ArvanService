@@ -15,5 +15,12 @@ class DatabaseSeeder extends Seeder
         factory(App\User::class, 50)->create();
         factory(App\Stream::class, 50)->create();
         factory(App\Lottery::class, 50)->create();
+
+        DB::table('lottery_user')->insert(
+            [
+                'user_id' => App\User::all()->random()->first()->id,
+                'lottery_id' => App\Lottery::all()->random()->first()->id,
+            ]
+        );
     }
 }
