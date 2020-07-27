@@ -16,16 +16,12 @@ class CreateLotteriesTable extends Migration
         Schema::create('lotteries', function (Blueprint $table) {
             $table->id();
             $table->string('code');
-            $table->string('capacity')->unique();
-            $table->integer('stream_id')
-                    ->unsigned()
-                    ->index();
+            $table->integer('capacity')->unsigned();
+            $table->integer('stream_id')->unsigned();
             $table->foreign('stream_id')
                     ->references('id')
-                    ->on('streams')
-                    ->default(1);
+                    ->on('streams');
             $table->dateTime('lottery_ends_at', 0);
-            // $table->timestamps('lottery_ends_at');
             $table->timestamps();
         });
     }
