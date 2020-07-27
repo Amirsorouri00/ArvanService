@@ -39,7 +39,7 @@ class RegisterController extends Controller
      */
     public function __construct()
     {
-        // $this->middleware('guest');
+        $this->middleware('guest');
     }
 
     /**
@@ -68,7 +68,7 @@ class RegisterController extends Controller
      */
     protected function registered(Request $request, $user)
     {
-        $token = auth('api')->login($user); // Reminder
+        $token = auth('api')->login($user);
         return redirect()->intended(RouteServiceProvider::HOME)
                 ->header('X-Token', $token);
     }
