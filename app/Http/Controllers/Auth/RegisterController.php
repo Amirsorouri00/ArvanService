@@ -59,6 +59,20 @@ class RegisterController extends Controller
     }
 
     /**
+     * The user has been registered.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  mixed  $user
+     * @return mixed
+     */
+    protected function registered(Request $request, $user)
+    {
+        $token = auth('api')->login($user);
+        return redirect()->intended(RouteServiceProvider::HOME)
+                ->header('X-Token', $token);
+    }
+
+    /**
      * Create a new user instance after a valid registration.
      *
      * @param  array  $data
