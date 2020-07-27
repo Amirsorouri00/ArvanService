@@ -23,10 +23,13 @@ Route::group([
     'middleware' => 'api',
     'prefix' => 'auth'
 ], function ($router) {
+    Route::post('login', 'Auth\APIAuthController@login');
+    Route::post('logout', 'Auth\APIAuthController@logout');
+    Route::post('refresh', 'Auth\APIAuthController@refresh');
+    Route::post('me', 'Auth\APIAuthController@me');
+});
 
-    Route::post('login', 'AuthController@login');
-    Route::post('logout', 'AuthController@logout');
-    Route::post('refresh', 'AuthController@refresh');
-    Route::post('me', 'AuthController@me');
-
+Route::group(['middleware' => 'api'], function($router) {
+    Route::resource('lotteries', 'LotteryController');
+    Route::resource('streams', 'StreamController');
 });

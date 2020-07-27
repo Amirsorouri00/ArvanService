@@ -8,6 +8,7 @@ use App\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use \Illuminate\Http\Request;
 
 class RegisterController extends Controller
 {
@@ -38,7 +39,7 @@ class RegisterController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('guest');
+        // $this->middleware('guest');
     }
 
     /**
@@ -67,7 +68,7 @@ class RegisterController extends Controller
      */
     protected function registered(Request $request, $user)
     {
-        $token = auth('api')->login($user);
+        $token = auth('api')->login($user); // Reminder
         return redirect()->intended(RouteServiceProvider::HOME)
                 ->header('X-Token', $token);
     }

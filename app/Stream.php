@@ -3,9 +3,14 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notifiable;
+use Tymon\JWTAuth\Contracts\JWTSubject;
+
 
 class Stream extends Model
 {
+    protected $guarded = ['id'];
+
     use Notifiable;
 
     /**
