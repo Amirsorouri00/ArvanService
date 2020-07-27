@@ -51,17 +51,21 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
-        if ($request->wantsJson()) {   
-            // Header has Accept: application/json in request
-            return $this->handleApiException($request, $exception);
-        } else {
-            $retval = parent::render($request, $exception);
-        }
-    
-        return $retval;
+        // if ($request->wantsJson()) {   
+        //     // Header has Accept: application/json in request
+        //     return $this->handleApiException($request, $exception);
+        // }
+
+        return parent::render($request, $exception);;
     }
 
-
+    /**
+     * List of throwable exceptions are available at:
+     * https://www.php.net/manual/en/class.exception.php
+     * 
+     * @param  \Illuminate\Http\Request  $request
+     * 
+     */
     private function handleApiException($request, Throwable $exception)
     {
         $exception = $this->prepareException($exception);
