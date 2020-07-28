@@ -8,44 +8,19 @@ require('./bootstrap');
 
 window.Vue = require('vue');
 
-/**
- * The following block of code may be used to automatically register your
- * Vue components. It will recursively scan this directory for the Vue
- * components and automatically register them with their "basename".
- *
- * Eg. ./components/ExampleComponent.vue -> <example-component></example-component>
- */
+import Vuex from 'vuex';
+import router from './services/router'
+import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
 
-
-const files = require.context('./', true, /\.vue$/i)
-// console.log("sdfsfdsdfs", files.keys())
-files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default))
-// files.keys().map(key => console.log(key.split('/').pop().split('.')[0], files(key).default))
-
-
-// console.log(require('./components/KeyGeneratorComponent.vue').default)
-// console.log(require('./components/ExampleComponent.vue').default)
-
-
-// Vue.component('example-component', require('./components/ExampleComponent.vue').default);
-Vue.component('key-generator-componenet', require('./components/KeyGeneratorComponent.vue').default);
-
-/**
- * Next, we will create a fresh Vue application instance and attach it to
- * the page. Then, you may begin adding components to this application
- * or customize the JavaScript scaffolding to fit your unique needs.
- */
-
-// Vue.component('button-counter', {
-//     data: function () {
-//       return {
-//         count: 0
-//       }
-//     },
-//     template: '<button v-on:click="count++">You clicked me {{ count }} times.</button>'
-// })
+// Install BootstrapVue
+Vue.use(BootstrapVue)
+// Optionally install the BootstrapVue icon components plugin
+Vue.use(IconsPlugin)
+// Vue.use(VueRouter)
+Vue.use(Vuex);
 
 const app = new Vue({
 	el: "#app",
+	router,
 })
 

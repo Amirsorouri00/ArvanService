@@ -74,7 +74,8 @@ class Lottery extends Model
     public function update(array $attributes = [], $options = [])
     {
         if ($options['capacity']) {
-            Redis::set($this->code, $options['capacity']);
+            // requires redislock
+            Redis::set($this->code, $options['capacity']); // Readme
         }
         if (! $this->exists) {
             return false;

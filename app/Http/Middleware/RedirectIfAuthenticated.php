@@ -19,9 +19,10 @@ class RedirectIfAuthenticated
     public function handle($request, Closure $next, $guard = null)
     {
         if (Auth::guard($guard)->check()) {
-            $token = auth('api')->login($request->user());
+            $token = auth('api')->login($user);
             return redirect(RouteServiceProvider::HOME)
-                    ->header('X-Token', $token);
+                    ->header('X-Token', $token)
+                    ->header('asdfas', 'sadfasdf');
         }
         return $next($request);
     }

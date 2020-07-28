@@ -35,7 +35,17 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav mr-auto">
+                        <li class="nav-item active">
+                            <router-link class="nav-link" to="/home">Home <span class="sr-only">(current)</span></router-link>
 
+                            <!-- <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a> -->
+                        </li>
+                        <li class="nav-item">
+                            <router-link class="nav-link" to="/blog">CreateLottery</router-link>
+                        </li>
+                        <li class="nav-item">
+                            <router-link class="nav-link" to="/foo">WinnersReport</router-link>
+                        </li>
                     </ul>
 
                     <!-- Right Side Of Navbar -->
@@ -68,6 +78,7 @@
                                     </form>
                                 </div>
                             </li>
+                            
                         @endguest
                     </ul>
                 </div>
@@ -75,7 +86,9 @@
         </nav>
 
         <main class="py-4">
+            
             @yield('content')
+
         </main>
     </div>
 </body>
