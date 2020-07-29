@@ -25,8 +25,17 @@ Route::group([
     Route::post('me', 'Auth\APIAuthController@me');
 });
 
+Route::prefix('admin')->group(function () {
+    Route::prefix('lottery')->group(function () {
+        Route::post('report', 'LotteryUserController@report');
+    });
+});
+
 // Route::group(['middleware' => 'api'], function($router) {
     Route::resource('lotteries', 'LotteryController');
     Route::resource('streams', 'StreamController');
     Route::resource('users', 'UserController');
+    Route::prefix('lottery')->group(function () {
+        Route::post('attend', 'LotteryUserController@attend');
+    });
 // });

@@ -8,7 +8,7 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 use App\Helper\RandomHelper;
 use Illuminate\Support\Facades\Redis;
 use App\Exceptions\Handler;
-
+use Illuminate\Support\Facades\Cache;
 
 
 class Lottery extends Model
@@ -75,9 +75,17 @@ class Lottery extends Model
     {
         if ($options['capacity']) {
             // requires redislock
-            Redis::set($this->code, $options['capacity']); // Readme
+            $lock = Cache::lock('attendees', 1);
+            $ttl = Redis::ttl($lotteryCode);
+            if ($lock->get()) {
+                Redis::setEx($lotteryCode, $ttl, $value);
+                $lock->release();
+            }
+            else {
+                return false;
+            }
         }
-        if (! $this->exists) {
+        if (!$this->exists) {
             return false;
         }
 

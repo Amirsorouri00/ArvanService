@@ -5,6 +5,7 @@ namespace App\Exceptions;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
 use App\Exceptions\Exception;
+use Illuminate\Database\QueryException;
 
 class Handler extends ExceptionHandler
 {
@@ -51,10 +52,10 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
-        // if ($request->wantsJson()) {   
-        //     // Header has Accept: application/json in request
-        //     return $this->handleApiException($request, $exception);
-        // }
+        if ($request->wantsJson()) {   
+            // Header has Accept: application/json in request
+            return $this->handleApiException($request, $exception);
+        }
 
         return parent::render($request, $exception);;
     }
@@ -67,30 +68,36 @@ class Handler extends ExceptionHandler
      * 
      */
     private function handleApiException($request, Throwable $exception)
-    {
+    {   
         $exception = $this->prepareException($exception);
 
-        if ($exception instanceof \Illuminate\Http\Exception\HttpResponseException) {
+        $queryException = 0;
+        if (get_class($exception) == 'Illuminate\Http\Exception\HttpResponseException') {
+            $queryException = 5;
             $exception = $exception->getResponse();
         }
 
-        if ($exception instanceof \Illuminate\Auth\AuthenticationException) {
+        if (get_class($exception) == 'Illuminate\Auth\AuthenticationException') {
+            $queryException = 4;
             $exception = $this->unauthenticated($request, $exception);
         }
 
-        if ($exception instanceof \Illuminate\Validation\ValidationException) {
+        if (get_class($exception) == 'Illuminate\Validation\ValidationException') {
+            $queryException = 3;
             $exception = $this->convertValidationExceptionToResponse($exception, $request);
         }
 
-        if ($exception instanceof \Illuminate\Database\QueryException) {
+        if (get_class($exception) == 'Illuminate\Database\QueryException') {
+            $queryException = 1;
             $exception = $exception->getMessage();
         }
 
-        return $this->customApiResponse($exception);
+        return $this->customApiResponse($exception, $queryException);
     }
 
-    private function customApiResponse($exception)
+    private function customApiResponse($exception, $queryException)
     {
+
         if (method_exists($exception, 'getStatusCode')) {
             $statusCode = $exception->getStatusCode();
         } else {
@@ -117,7 +124,12 @@ class Handler extends ExceptionHandler
                 $response['errors'] = $exception->original['errors'];
                 break;
             default:
-                $response['message'] = ($statusCode == 500) ? 'Whoops, looks like something went wrong' : $exception->getMessage();
+                if ($queryException == 1) {
+                    $response['message'] = 'The wrong inputs given.'.$queryException;
+                }
+                else {
+                    $response['message'] = ($statusCode == 500) ? 'Whoops, looks like something went wrong or maybe wrong inputs. Check everythin and try again.'.$queryException : $exception->getMessage();
+                }
                 break;
         }
 
