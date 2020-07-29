@@ -13,6 +13,12 @@ use Illuminate\Database\QueryException;
 
 class LotteryUserController extends Controller
 {
+
+    /**
+     * Test OK
+     * @param App\Requests\LotteryRequest
+     * @return JsonResponse
+     */
     public function report(LotteryRequest $request)
     {
         $lotteryCode = $request->input('lottery_code');

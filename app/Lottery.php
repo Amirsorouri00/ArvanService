@@ -36,6 +36,7 @@ class Lottery extends Model
     }
 
     /**
+     * Test OK
      * Save a new model and return the instance.
      *
      * @param  array  $attributes
@@ -46,8 +47,8 @@ class Lottery extends Model
         $code = RandomHelper::quickRandom();
         
         $attributes['code'] = $code;
-        $attributes['stream_id'] = 1; //Just for test
         // Just for test
+        $attributes['stream_id'] = 1; 
         $attributes['lottery_ends_at'] = date("Y-m-d H:i:s", strtotime("+1 hours +30 minutes")); // Just for test
 
         // 5400 s === 1h + 30 m Just for test
@@ -56,7 +57,7 @@ class Lottery extends Model
         try {
             $model = new static($attributes);
             $model->save();
-        } catch (Throwable $e) { // App\Exception\Handler@report...
+        } catch (Throwable $e) { 
             $resp = Redis::del($code);
             Handler::report($e);
             return false;
@@ -65,6 +66,7 @@ class Lottery extends Model
     }
 
     /**
+     * Test OK
      * Update the model in the database.
      *
      * @param  array  $attributes
@@ -73,22 +75,22 @@ class Lottery extends Model
      */
     public function update(array $attributes = [], $options = [])
     {
+        if (!$this->exists) {
+            return false;
+        }
+
         if ($options['capacity']) {
             // requires redislock
             $lock = Cache::lock('attendees', 1);
             $ttl = Redis::ttl($lotteryCode);
             if ($lock->get()) {
-                Redis::setEx($lotteryCode, $ttl, $value);
+                Redis::setEx($lotteryCode, $ttl, $options['capacity']);
                 $lock->release();
             }
             else {
                 return false;
             }
         }
-        if (!$this->exists) {
-            return false;
-        }
-
         return $this->fill($attributes)->save();
     }
 }
