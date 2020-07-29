@@ -12,6 +12,7 @@
                         small
                     ></b-table>
                     <b-pagination
+                        v-on:input="clicked5"
                         v-model="currentPage"
                         :total-rows="rows"
                         :per-page="perPage"
@@ -19,16 +20,17 @@
                     ></b-pagination>
                     <button v-on:click="clicked2" type="button" class="btn btn-primary">Key Generator</button>
                 </div>
-               
+
             </div>
         </div>
     </div>
-   
-        
+
+
 </template>
 
 <script>
     const axios = require('axios');
+    //https://github.com/bootstrap-vue/bootstrap-vue/issues/302
     export default {
         name: 'WinnersReport',
         data: function () {
@@ -65,6 +67,8 @@
                     var message = response.data;
                     self.items = message.data
                     self.message = message.data
+                    self.$store.commit('saveReportItems',   
+                            self.items);
                     console.log('message', message, self.items) 
                 })
                 .catch(function (error) {
@@ -77,12 +81,21 @@
                     console.log('then')
                 });
                 console.log("clicked")
+            },
+            clicked5() {
+                console.log('hereee')
+                self = this
+                self.$store.commit('saveCurrentPageNo',   
+                            this.currentPage);
             }
         },
         mounted () {
             let tmp = this.message
             let tmp2 = this.another
             console.log('WinnersReport Component mounted.', tmp,tmp2)
+            var self = this
+            self.items = this.$store.state.reportItems;
+            self.currentPage = this.$store.state.paginationPageNo;
         }
     }
 </script>

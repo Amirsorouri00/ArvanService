@@ -26,7 +26,8 @@ class LotteryUserController extends Controller
         try {
             $values = Redis::keys('lottery:*:'.$lotteryCode);
         } catch (\Throwable $exception) {
-            throw $exception;
+            // throw $exception;
+            return response(['error' => 'Oops! something went wrong with redis server., check it out and try again.'], 205);
         }
         
         $phoneNumbers = array();
@@ -55,7 +56,7 @@ class LotteryUserController extends Controller
         $lotteryCode = $request->input('lottery_code');
 
         if (1 == Redis::exists('lottery:'.$phoneNumber.':'.$lotteryCode)) {
-            return response(['error' => 'You\'ve been already take part in this lottery before.'], 406);
+            return response(['error' => 'You\'ve been already take part in this lottery before.'], 203);
         }
         else{
             // Lock acquired for 1 seconds...
@@ -78,7 +79,7 @@ class LotteryUserController extends Controller
                         Redis::set('lottery:'.$phoneNumber.':'.$lotteryCode, 1);
                         $lock->release();
                         $endtime = microtime(true);
-                        return response(['data' => 'You Win.'.($endtime - $starttime)], 201);
+                        return response(['data' => 'You Win. Critical Section of the service took: '.($endtime - $starttime).' second.'], 201);
                     } catch (\Throwable $exception) {
                         Redis::setEx($lotteryCode, $ttl, $value);
                         $lock->release();
@@ -87,11 +88,11 @@ class LotteryUserController extends Controller
                     }
                 }
                 else{
-                    return response(['error' => 'This lottery is not active anymore.'], 406);
+                    return response(['error' => 'This lottery is not active anymore.'], 204);
                 }
             }
             else {
-                return response(['error' => 'We couldn\'t take part in the lottery this time. Please try another time.'], 423);
+                return response(['error' => 'We couldn\'t take part in the lottery this time. Please try another time.'], 205);
             }
         }
     }

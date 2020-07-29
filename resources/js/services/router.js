@@ -3,8 +3,8 @@ window.Vue = require('vue')
 import Vuex from 'vuex'
 import VueRouter from 'vue-router'
 
-import AttendInLottery from '../components/ExampleComponent'
-import CreateLottery from '../components/KeyGeneratorComponent'
+import AttendInLottery from '../components/AttendInLottery'
+import CreateLottery from '../components/CreateLottery'
 import WinnersReport from '../components/WinnersReport'
 
 
@@ -15,18 +15,18 @@ Vue.use(Vuex)
 export default new VueRouter({
     routes: [
       {
-        path: '/home',
-        name: 'home',
+        path: '/attendinlottery',
+        name: 'attendInLottery',
         component: AttendInLottery
       },
       {
-        path: '/blog',
-        name: 'blog',
+        path: '/createlottery',
+        name: 'createLottery',
         component: CreateLottery
       },
       {
-        path: '/foo',
-        name: 'winners_report',
+        path: '/winnersreport',
+        name: 'winnersReport',
         component: WinnersReport
       },
     ]

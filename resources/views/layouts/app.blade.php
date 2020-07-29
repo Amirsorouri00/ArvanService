@@ -37,14 +37,13 @@
                     <ul class="navbar-nav mr-auto">
                        
                         <li class="nav-item">
-                            <router-link class="nav-link" to="/blog">CreateLottery</router-link>
+                            <router-link class="nav-link" to="/createlottery">1.CreateLottery</router-link>
                         </li>
                         <li class="nav-item">
-                            <router-link class="nav-link" to="/foo">WinnersReport</router-link>
+                            <router-link class="nav-link" to="/attendinlottery">2.Attend in Lottery <span class="sr-only">(current)</span></router-link>
                         </li>
-
-                        <li class="nav-item active">
-                            <router-link class="nav-link" to="/home">Home <span class="sr-only">(current)</span></router-link>
+                        <li class="nav-item">
+                            <router-link class="nav-link" to="/winnersreport">3.WinnersReport</router-link>
                         </li>
                     </ul>
 
