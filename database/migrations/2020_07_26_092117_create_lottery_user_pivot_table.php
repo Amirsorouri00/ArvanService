@@ -18,15 +18,14 @@ class CreateLotteryUserPivotTable extends Migration
                     ->index();
             $table->foreign('lottery_id')
                     ->references('id')
-                    ->on('lotteries')
-                    ->onDelete('cascade');
+                    ->on('lotteries');
             $table->integer('user_id')
                     ->unsigned()
                     ->index();
             $table->foreign('user_id')
                     ->references('id')
-                    ->on('users')
-                    ->onDelete('cascade');
+                    ->on('users');
+            $table->softDeletes('deleted_at', 0);
             $table->primary(['lottery_id', 'user_id']);
         });
     }

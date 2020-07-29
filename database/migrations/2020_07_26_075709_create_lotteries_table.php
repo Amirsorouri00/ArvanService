@@ -22,6 +22,7 @@ class CreateLotteriesTable extends Migration
                     ->references('id')
                     ->on('streams');
             $table->dateTime('lottery_ends_at', 0);
+            $table->boolean('ended')->default('false');
             $table->timestamps();
         });
     }
