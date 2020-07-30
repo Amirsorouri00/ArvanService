@@ -18,9 +18,10 @@ use App\Helper\LotteryUserResponseHelper as ResponseHelper;
 class LotteryUserController extends Controller
 {
     /**
-     * Test OK
+     * Get Lottery Winners(specific/general)
      * @param App\Requests\LotteryRequest
      * @return JsonResponse
+     * Test OK
      */
     public function report(LotteryRequest $request)
     {
@@ -49,9 +50,15 @@ class LotteryUserController extends Controller
 
 
     /**
-     * Test OK
+     * Attend in a given Lottery
+     * @param phone string The user phoneNo that wants to attend in lottery. Example: 09128048897
+     * @param lottery_code string The lottery code which user wants to attend. Example: SvTdsUL9fiiuqryNNvoz
+     * @return  {
+     *  "data": {},
+     * }
      * @param App\Requests\LotteryRequest
      * @return JsonResponse
+     * Test OK
      */
     public function attend(LotteryRequest $request)
     {
@@ -111,44 +118,6 @@ class LotteryUserController extends Controller
             } finally {
                 optional($lock)->release();
             }
-
-
-            // if ($lock->get()) {
-            //     if(Redis::get($lotteryCode) > 0) {
-            //         try {
-            //             $ret = Redis::multi()->decr($lotteryCode)->set($key, 1)->exec();
-            //             $lock->release();
-            //             $endTime = microtime(true);
-                        
-            //             foreach ($ret as $status) { 
-            //                 if (!$status) {
-            //                     return response(['error' => 
-            //                         ResponseHelper::statusCodeResponse(206), 'critical_section_time' => 
-            //                         ResponseHelper::criticalSectionTime($endTime,$startTime)], 206);
-            //                 }
-            //             }
-            //             return response(['data' => 'You Win.', 'critical_section_time' => 
-            //                 ResponseHelper::criticalSectionTime($endTime,$startTime)], 201);
-                        
-            //         } catch (\Throwable $exception) {
-            //             // throw $exception;
-            //             $lock->release();
-            //             return response(['error' => ResponseHelper::statusCodeResponse(204)], 304);
-            //         }
-            //     }
-            //     else{
-            //         $endTime = microtime(true);
-
-            //         return response(['error' => ResponseHelper::statusCodeResponse(209), 'critical_section_time' =>
-            //             ResponseHelper::criticalSectionTime($endTime,$startTime)], 209);
-            //     }
-            // }
-            // else {
-            //     $endTime = microtime(true);
-
-            //     return response(['error' => ResponseHelper::statusCodeResponse(205), 'critical_section_time' =>
-            //         ResponseHelper::criticalSectionTime($endTime,$startTime)], 205);
-            // }
         }
     }
 }

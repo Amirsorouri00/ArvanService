@@ -15,9 +15,10 @@ class StreamController extends Controller
     }
 
     /**
-     * Test Ok
+     * Create Stream
      * @param App\Requests\StreamRequest
      * @return JsonResponse
+     * Test Ok
      */
     public function store(StreamRequest $request)
     {
@@ -33,9 +34,9 @@ class StreamController extends Controller
     }
 
     /**
-     * Test Ok
      * @param App\Requests\StreamRequest
      * @return JsonResponse
+     * Test Ok
      */
     public function update(StreamRequest $request, $id)
     {
