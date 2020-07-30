@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Exceptions\InstallationFailedException;                                                     
-use App\Model\User;                                                                                
+use App\User;                                                                                
 use Exception;                                                                                      
 use Illuminate\Contracts\Console\Kernel as Artisan;                                                 
 use Illuminate\Contracts\Hashing\Hasher as Hash;                                                    
@@ -28,6 +28,12 @@ class InitCommand extends Command
      */
     protected $description = 'Install pre-requisits of this web-service';
 
+    private $artisan;                                                                               
+    private $dotenvEditor;                                                                          
+    private $hash;                                                                                  
+    private $db;                                                                                    
+
+
     /**
      * Create a new command instance.
      *
@@ -39,10 +45,12 @@ class InitCommand extends Command
         DotenvEditor $dotenvEditor,                                                                 
         DB $db 
     ) {
+        parent::__construct();
+
+        $this->dotenvEditor = $dotenvEditor;
         $this->artisan = $artisan;                                                                  
         $this->hash = $hash;                                                                        
         $this->db = $db;                                                                            
-        parent::__construct();
     }
 
     /**
@@ -66,10 +74,11 @@ class InitCommand extends Command
             $this->maybeSetUpDatabase();
             $this->migrateDatabase();
             $this->maybeSeedDatabase();
-            $this->compileFrontEndAssets();
+            // $this->compileFrontEndAssets();
         } catch (Exception $e) {
-            $this->error("Oops! Koel installation or upgrade didn't finish successfully.");
-            $this->error('Please try again, or visit '.config('koel.misc.docs_url').' for manual installation.');
+            echo($e);
+            $this->error("Oops! ArvanService installation or upgrade didn't finish successfully.");
+            $this->error('Please try again, or visit '.config('abr.misc.docs_url').' for manual installation.');
             $this->error('😥 Sorry for this. You deserve better.');
 
             return;
@@ -97,11 +106,107 @@ class InitCommand extends Command
     {
         if (!config('jwt.secret')) {
             $this->info('Generating JWT secret');
-            $this->artisan->call('koel:generate-jwt-secret');
+            $this->artisan->call('arvan:generate-jwt-secret');
         } else {
             $this->comment('JWT secret exists -- skipping');
         }
     }
+
+        /**
+     * Prompt user for valid database credentials and set up the database.
+     */
+    private function setUpDatabase(): void
+    {
+        $config = [
+            'DB_CONNECTION' => '',
+            'DB_HOST' => '',
+            'DB_PORT' => '',
+            'DB_DATABASE' => '',
+            'DB_USERNAME' => '',
+            'DB_PASSWORD' => '',
+        ];
+
+        $config['DB_CONNECTION'] = $this->choice(
+            'Your DB driver of choice',
+            [
+                'mysql' => 'MySQL/MariaDB',
+                'pgsql' => 'PostgreSQL',
+                'sqlsrv' => 'SQL Server',
+                'sqlite-e2e' => 'SQLite',
+            ],
+            'mysql'
+        );
+
+        if ($config['DB_CONNECTION'] === 'sqlite-e2e') {
+            $config['DB_DATABASE'] = $this->ask('Absolute path to the DB file: ./database/AbrDB.db');
+        } else {
+            $config['DB_HOST'] = $this->anticipate('DB host', ['127.0.0.1', 'localhost']);
+            $config['DB_PORT'] = (string) $this->ask('DB port (leave empty for default)');
+            $config['DB_DATABASE'] = $this->anticipate('DB name', ['koel']);
+            $config['DB_USERNAME'] = $this->anticipate('DB user', ['koel']);
+            $config['DB_PASSWORD'] = (string) $this->ask('DB password');
+        }
+
+        foreach ($config as $key => $value) {
+            $this->dotenvEditor->setKey($key, $value);
+        }
+
+        $this->dotenvEditor->save();
+
+        // Set the config so that the next DB attempt uses refreshed credentials
+        config([
+            'database.default' => $config['DB_CONNECTION'],
+            "database.connections.{$config['DB_CONNECTION']}.host" => $config['DB_HOST'],
+            "database.connections.{$config['DB_CONNECTION']}.port" => $config['DB_PORT'],
+            "database.connections.{$config['DB_CONNECTION']}.database" => $config['DB_DATABASE'],
+            "database.connections.{$config['DB_CONNECTION']}.username" => $config['DB_USERNAME'],
+            "database.connections.{$config['DB_CONNECTION']}.password" => $config['DB_PASSWORD'],
+        ]);
+    }
+
+    private function setUpAdminAccount(): void
+    {
+        $this->info("Let's create the admin account.");
+
+        [$name, $email, $phone, $username, $password] = $this->gatherAdminAccountCredentials();
+
+        User::create([
+            'name' => $name,
+            'email' => $email,
+            'username' => $username,
+            'phone' => $phone,
+            'password' => $this->hash->make($password),
+            'is_admin' => true,
+        ]);
+    }
+
+        /** @return array<string> */
+        private function gatherAdminAccountCredentials(): array
+        {
+            if ($this->inNoInteractionMode()) {
+                return [config('arvan.admin.name'), config('arvan.admin.email'), config('arvab.admin.password')];
+            }
+    
+            $name = $this->ask('Your name', config('arvan.admin.name'));
+            $username = $this->ask('Your username', config('arvan.admin.username'));
+            $email = $this->ask('Your email address', config('arvan.admin.email'));
+            $phone = $this->ask('Your phone number address', config('arvan.admin.phoneNumber'));
+            $passwordConfirmed = false;
+            $password = null;
+    
+            while (!$passwordConfirmed) {
+                $password = $this->secret('Your desired password');
+                $confirmation = $this->secret('Again, just to make sure');
+    
+                if ($confirmation !== $password) {
+                    $this->error("That doesn't match. Let's try again.");
+                } else {
+                    $passwordConfirmed = true;
+                }
+            }
+    
+            return [$name, $email, $phone, $username, $password];
+        }
 
     private function maybeSetUpDatabase(): void
     {
@@ -123,6 +228,7 @@ class InitCommand extends Command
 
     private function maybeSeedDatabase(): void
     {
+        echo(User::count());
         if (!User::count()) {
             $this->setUpAdminAccount();
             $this->info('Seeding initial data');
