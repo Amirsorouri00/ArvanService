@@ -60,7 +60,7 @@ class InitCommand extends Command
      */
     public function handle()
     {
-        $this->comment('Attempting to install or upgrade Koel.');                                   
+        $this->comment('Attempting to install or upgrade ArvanService.');                                   
         $this->comment('Remember, you can always install/upgrade manually following the guide here:');
         $this->info('📙  '.config('abr.misc.docs_url').PHP_EOL);
 
@@ -74,7 +74,7 @@ class InitCommand extends Command
             $this->maybeSetUpDatabase();
             $this->migrateDatabase();
             $this->maybeSeedDatabase();
-            // $this->compileFrontEndAssets();
+            $this->compileFrontEndAssets();
         } catch (Exception $e) {
             echo($e);
             $this->error("Oops! ArvanService installation or upgrade didn't finish successfully.");
@@ -83,6 +83,10 @@ class InitCommand extends Command
 
             return;
         }
+        $this->comment('Done.');
+        $this->comment('Run "1.php artisan serve"');
+        $this->comment('Run "2.open the link just showed up at the browser."');
+        $this->comment('Run "3.Register a new user and enjoy ArvanService."');
 
         return 0;
     }
@@ -124,6 +128,9 @@ class InitCommand extends Command
             'DB_DATABASE' => '',
             'DB_USERNAME' => '',
             'DB_PASSWORD' => '',
+            'DB_FOREIGN_KEYS' => '',
+            'CACHE_DRIVER' => '',
+            'LOG_CHANNEL' => ''
         ];
 
         $config['DB_CONNECTION'] = $this->choice(
@@ -132,21 +139,24 @@ class InitCommand extends Command
                 'mysql' => 'MySQL/MariaDB',
                 'pgsql' => 'PostgreSQL',
                 'sqlsrv' => 'SQL Server',
-                'sqlite-e2e' => 'SQLite',
+                'sqlite' => 'SQLite',
             ],
             'mysql'
         );
 
-        if ($config['DB_CONNECTION'] === 'sqlite-e2e') {
-            $config['DB_DATABASE'] = $this->ask('Absolute path to the DB file: ./database/AbrDB.db');
+        if ($config['DB_CONNECTION'] === 'sqlite') {
+            $config['DB_DATABASE'] = $this->ask('Absolute path to the DB file recommended(home/{username}/../ArvanService/database/AbrDB.db): ');
+            $config['DB_FOREIGN_KEYS'] = 'true';
         } else {
             $config['DB_HOST'] = $this->anticipate('DB host', ['127.0.0.1', 'localhost']);
             $config['DB_PORT'] = (string) $this->ask('DB port (leave empty for default)');
-            $config['DB_DATABASE'] = $this->anticipate('DB name', ['koel']);
-            $config['DB_USERNAME'] = $this->anticipate('DB user', ['koel']);
+            $config['DB_DATABASE'] = $this->anticipate('DB name', ['arvan']);
+            $config['DB_USERNAME'] = $this->anticipate('DB user', ['arvan']);
             $config['DB_PASSWORD'] = (string) $this->ask('DB password');
+            
         }
-
+        $config['CACHE_DRIVER'] = 'redis';
+        $config['LOG_CHANNEL=stack'] = 'stack';
         foreach ($config as $key => $value) {
             $this->dotenvEditor->setKey($key, $value);
         }
@@ -248,11 +258,11 @@ class InitCommand extends Command
     {
         $this->info('Now to front-end stuff');
 
-        // We need to run several yarn commands:
+        // We need to run several yarn/npm commands:
         // - The first to install node_modules in the resources/assets submodule
-        // - The second and third for the root folder, to build Koel's front-end assets with Mix.
+        // - The second and third for the root folder, to build ArvanService's front-end assets with Mix.
 
-        chdir('./resources/assets');
+        // chdir('./resources/assets');
         $this->info('├── Installing Node modules in resources/assets directory');
 
         $runOkOrThrow = static function (string $command): void {
@@ -260,12 +270,15 @@ class InitCommand extends Command
             throw_if((bool) $status, InstallationFailedException::class);
         };
 
-        $runOkOrThrow('yarn install --colors');
+        // $runOkOrThrow('yarn install --colors');
 
-        chdir('../..');
+        // chdir('../..');
         $this->info('└── Compiling assets');
 
-        $runOkOrThrow('yarn install --colors');
-        $runOkOrThrow('yarn production --colors');
+        $runOkOrThrow('npm install');
+        $runOkOrThrow('npm run dev ');
+
+        // $runOkOrThrow('yarn install --colors');
+        // $runOkOrThrow('yarn production --colors');
     }
 }

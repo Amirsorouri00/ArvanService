@@ -14,7 +14,7 @@ return [
     */ 
     'misc' => [                                                                                     
         'home_url' => 'http://127.0.0.1:8000/welcome',                                                   
-        'docs_url' => './public/docs/index.php',                                               
+        'docs_url' => './public/docs/index.html',                                               
         'github_url' => 'https://https://github.com/Amirsorouri00/ArvanService',                      
     ], 
 ];
