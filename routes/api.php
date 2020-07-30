@@ -26,7 +26,7 @@ Route::group([
 });
 
 Route::prefix('admin')->group(function () {
-    Route::prefix('lottery')->group(function () {
+    Route::prefix('winners')->group(function () {
         Route::post('report', 'LotteryUserController@report');
     });
 });

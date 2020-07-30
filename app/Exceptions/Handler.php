@@ -52,10 +52,10 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
-        if ($request->wantsJson()) {   
-            // Header has Accept: application/json in request
-            return $this->handleApiException($request, $exception);
-        }
+        // if ($request->wantsJson()) {   
+        //     // Header has Accept: application/json in request
+        //     return $this->handleApiException($request, $exception);
+        // }
 
         return parent::render($request, $exception);;
     }

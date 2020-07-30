@@ -58,4 +58,23 @@ class User extends Authenticatable implements JWTSubject
     {
         return [];
     }
+
+    /**
+     * The users that belong to the Lottery.
+     */
+    public function users()
+    {
+        return $this->belongsToMany('App\Lottery');
+    }
+
+    public static function report($values) {
+        $phoneNumbers = array();
+
+        foreach ($values as $value) {
+            list($lottery, $phoneNumber, $lotteryCode) = explode(':', $value);
+            array_push($phoneNumbers, $phoneNumber);
+        }
+        $users = User::select('*')->whereIn('phone', $phoneNumbers)->get();
+        return $users;
+    }
 }

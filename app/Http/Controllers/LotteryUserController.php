@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Lottery;
+use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
@@ -10,6 +11,8 @@ use App\Http\Requests\LotteryRequest;
 use Illuminate\Support\Facades\Cache;
 use App\Exceptions\AlreadyAttendedInLotteryException;
 use Illuminate\Database\QueryException;
+use App\Helper\LotteryUserResponseHelper as ResponseHelper;
+
 
 class LotteryUserController extends Controller
 {
@@ -21,27 +24,21 @@ class LotteryUserController extends Controller
      */
     public function report(LotteryRequest $request)
     {
-        $lotteryCode = $request->input('lottery_code');
+        // $lotteryCode = $request->input('lottery_code');
         $values = array();
         try {
-            $values = Redis::keys('lottery:*:'.$lotteryCode);
+            $values = Redis::keys('lottery:*:*');
         } catch (\Throwable $exception) {
             // throw $exception;
-            return response(['error' => 'Oops! something went wrong with redis server., check it out and try again.'], 205);
+            return response(['error' => ResponseHelper::statusCodeResponse(205)], 205);
         }
         
-        $phoneNumbers = array();
-
         if (is_null($values)) {
             return response(['data' => []], 200);
         }
-
-        foreach ($values as $value) {
-            list($lottery, $phoneNumber, $lotteryCode) = explode(':', $value);
-            array_push($phoneNumbers, $phoneNumber);
-        }
-
-        return response(['data' => $phoneNumbers], 200);
+        $users = User::report($values);
+        
+        return response(['data' => $users], 200);
     }
 
 
@@ -55,44 +52,50 @@ class LotteryUserController extends Controller
         $phoneNumber = $request->input('phone');
         $lotteryCode = $request->input('lottery_code');
 
+        $key = 'lottery:'.$phoneNumber.':'.$lotteryCode;
+        // Redis::watch($key);
+
         if (1 == Redis::exists('lottery:'.$phoneNumber.':'.$lotteryCode)) {
-            return response(['error' => 'You\'ve been already take part in this lottery before.'], 203);
+            return response(['error' => ResponseHelper::statusCodeResponse(203)], 203);
         }
         else{
             // Lock acquired for 1 seconds...
-            $starttime = microtime(true);
+            $startTime = microtime(true);
+            $endTime = microtime(true);
             $lock = Cache::lock('attendees', 1);
             if ($lock->get()) {
-                $value = Redis::get($lotteryCode);
-                $ttl = Redis::ttl($lotteryCode);
-
-                if($value > 0 && $ttl != -1) {
-                    // User win scenario
+                if(Redis::get($lotteryCode) > 0) {
                     try {
-                        Redis::setEx($lotteryCode, $ttl, $value-1);
+                        $ret = Redis::multi()->decr($lotteryCode)->set($key, 1)->exec();
+                        $lock->release();
+                        $endTime = microtime(true);
+                        
+                        foreach ($ret as $status) { 
+                            if (!$status) {
+                                return response(['error' => ResponseHelper::statusCodeResponse(206),
+                                    'critical_section_time' => 
+                                    ResponseHelper::criticalSectionTime($endTime,$startTime)], 206);
+                            }
+                        }
+                        return response(['data' => 'You Win.', 'critical_section_time' => 
+                            ResponseHelper::criticalSectionTime($endTime,$startTime)], 201);
                         
                     } catch (\Throwable $exception) {
-                        throw $exception;
-                    }
-
-                    try {
-                        Redis::set('lottery:'.$phoneNumber.':'.$lotteryCode, 1);
-                        $lock->release();
-                        $endtime = microtime(true);
-                        return response(['data' => 'You Win. Critical Section of the service took: '.($endtime - $starttime).' second.'], 201);
-                    } catch (\Throwable $exception) {
-                        Redis::setEx($lotteryCode, $ttl, $value);
-                        $lock->release();
-                        
                         throw $exception;
                     }
                 }
                 else{
-                    return response(['error' => 'This lottery is not active anymore.'], 204);
+                    $endTime = microtime(true);
+
+                    return response(['error' => ResponseHelper::statusCodeResponse(204), 'critical_section_time' =>
+                    ResponseHelper::criticalSectionTime($endTime,$startTime)], 204);
                 }
             }
             else {
-                return response(['error' => 'We couldn\'t take part in the lottery this time. Please try another time.'], 205);
+                $endTime = microtime(true);
+
+                return response(['error' => ResponseHelper::statusCodeResponse(205), 'critical_section_time' =>
+                ResponseHelper::criticalSectionTime($endTime,$startTime)], 205);
             }
         }
     }
