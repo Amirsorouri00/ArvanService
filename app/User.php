@@ -72,8 +72,11 @@ class User extends Authenticatable implements JWTSubject
 
         foreach ($values as $value) {
             list($lottery, $phoneNumber, $lotteryCode) = explode(':', $value);
-            array_push($phoneNumbers, $phoneNumber);
+            if(!in_array($phoneNumber, $phoneNumbers, true)) {
+                array_push($phoneNumbers, $phoneNumber);
+            }
         }
+
         $users = User::select('*')->whereIn('phone', $phoneNumbers)->get();
         return $users;
     }

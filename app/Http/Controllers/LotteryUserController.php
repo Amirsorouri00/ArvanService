@@ -30,7 +30,8 @@ class LotteryUserController extends Controller
             $values = Redis::keys('lottery:*:*');
         } catch (\Throwable $exception) {
             // throw $exception;
-            return response(['error' => ResponseHelper::statusCodeResponse(205)], 205);
+            return response(['error' => 
+                ResponseHelper::statusCodeResponse(205)], 205);
         }
         
         if (is_null($values)) {
@@ -58,6 +59,9 @@ class LotteryUserController extends Controller
         if (1 == Redis::exists('lottery:'.$phoneNumber.':'.$lotteryCode)) {
             return response(['error' => ResponseHelper::statusCodeResponse(203)], 203);
         }
+        elseif (0 == Redis::exists($phoneNumber)) {
+            return response(['error' => ResponseHelper::statusCodeResponse(404)], 404);
+        }
         else{
             // Lock acquired for 1 seconds...
             $startTime = microtime(true);
@@ -72,8 +76,8 @@ class LotteryUserController extends Controller
                         
                         foreach ($ret as $status) { 
                             if (!$status) {
-                                return response(['error' => ResponseHelper::statusCodeResponse(206),
-                                    'critical_section_time' => 
+                                return response(['error' => 
+                                    ResponseHelper::statusCodeResponse(206), 'critical_section_time' => 
                                     ResponseHelper::criticalSectionTime($endTime,$startTime)], 206);
                             }
                         }
@@ -81,21 +85,23 @@ class LotteryUserController extends Controller
                             ResponseHelper::criticalSectionTime($endTime,$startTime)], 201);
                         
                     } catch (\Throwable $exception) {
-                        throw $exception;
+                        // throw $exception;
+                        $lock->release();
+                        return response(['error' => ResponseHelper::statusCodeResponse(204)], 304);
                     }
                 }
                 else{
                     $endTime = microtime(true);
 
-                    return response(['error' => ResponseHelper::statusCodeResponse(204), 'critical_section_time' =>
-                    ResponseHelper::criticalSectionTime($endTime,$startTime)], 204);
+                    return response(['error' => ResponseHelper::statusCodeResponse(209), 'critical_section_time' =>
+                        ResponseHelper::criticalSectionTime($endTime,$startTime)], 209);
                 }
             }
             else {
                 $endTime = microtime(true);
 
                 return response(['error' => ResponseHelper::statusCodeResponse(205), 'critical_section_time' =>
-                ResponseHelper::criticalSectionTime($endTime,$startTime)], 205);
+                    ResponseHelper::criticalSectionTime($endTime,$startTime)], 205);
             }
         }
     }

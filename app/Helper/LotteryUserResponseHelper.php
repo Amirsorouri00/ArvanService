@@ -45,10 +45,10 @@ class LotteryUserResponseHelper
         }
         elseif ($statusCode == 204) {
             # code...
-            return 'Unfortunately this lottery is not active anymore.';
+            return 'Unfortunately this lottery is not active anymore. Please try again';
         }
         else {
-            return 'Unknown.';
+            return 'This lottery is not created yet or is not active any more.';
         }
     }
 }
