@@ -10,13 +10,13 @@ use Illuminate\Support\Facades\Redis;
 use App\Http\Requests\LotteryRequest;
 use Illuminate\Support\Facades\Cache;
 use App\Exceptions\AlreadyAttendedInLotteryException;
+use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Database\QueryException;
 use App\Helper\LotteryUserResponseHelper as ResponseHelper;
 
 
 class LotteryUserController extends Controller
 {
-
     /**
      * Test OK
      * @param App\Requests\LotteryRequest
@@ -72,7 +72,9 @@ class LotteryUserController extends Controller
             $startTime = microtime(true);
             $endTime = microtime(true);
             $lock = Cache::lock('attendees', 1);
-            if ($lock->get()) {
+            try {
+                //code...
+                $lock->block(34);
                 if(Redis::get($lotteryCode) > 0) {
                     try {
                         $ret = Redis::multi()->decr($lotteryCode)->set($key, 1)->exec();
@@ -101,13 +103,52 @@ class LotteryUserController extends Controller
                     return response(['error' => ResponseHelper::statusCodeResponse(209), 'critical_section_time' =>
                         ResponseHelper::criticalSectionTime($endTime,$startTime)], 209);
                 }
-            }
-            else {
+            } catch (LockTimeoutException $e) {
                 $endTime = microtime(true);
 
                 return response(['error' => ResponseHelper::statusCodeResponse(205), 'critical_section_time' =>
                     ResponseHelper::criticalSectionTime($endTime,$startTime)], 205);
+            } finally {
+                optional($lock)->release();
             }
+
+
+            // if ($lock->get()) {
+            //     if(Redis::get($lotteryCode) > 0) {
+            //         try {
+            //             $ret = Redis::multi()->decr($lotteryCode)->set($key, 1)->exec();
+            //             $lock->release();
+            //             $endTime = microtime(true);
+                        
+            //             foreach ($ret as $status) { 
+            //                 if (!$status) {
+            //                     return response(['error' => 
+            //                         ResponseHelper::statusCodeResponse(206), 'critical_section_time' => 
+            //                         ResponseHelper::criticalSectionTime($endTime,$startTime)], 206);
+            //                 }
+            //             }
+            //             return response(['data' => 'You Win.', 'critical_section_time' => 
+            //                 ResponseHelper::criticalSectionTime($endTime,$startTime)], 201);
+                        
+            //         } catch (\Throwable $exception) {
+            //             // throw $exception;
+            //             $lock->release();
+            //             return response(['error' => ResponseHelper::statusCodeResponse(204)], 304);
+            //         }
+            //     }
+            //     else{
+            //         $endTime = microtime(true);
+
+            //         return response(['error' => ResponseHelper::statusCodeResponse(209), 'critical_section_time' =>
+            //             ResponseHelper::criticalSectionTime($endTime,$startTime)], 209);
+            //     }
+            // }
+            // else {
+            //     $endTime = microtime(true);
+
+            //     return response(['error' => ResponseHelper::statusCodeResponse(205), 'critical_section_time' =>
+            //         ResponseHelper::criticalSectionTime($endTime,$startTime)], 205);
+            // }
         }
     }
 }
