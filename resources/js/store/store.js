@@ -11,7 +11,7 @@ export default new Vuex.Store({
         reportItems: [
             { id: 1, first_name: 'Fred', last_name: 'Flintstone' },
             { id: 2, first_name: 'Wilma', last_name: 'Flintstone' },
-            { id: 3, first_name: 'Barney', last_name: 'Rubble' },
+            // { id: 3, first_name: 'Barney', last_name: 'Rubble' },
         ],
         paginationPageNo: 1
     }, 

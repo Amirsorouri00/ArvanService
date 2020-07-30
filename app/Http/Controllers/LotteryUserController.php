@@ -24,10 +24,15 @@ class LotteryUserController extends Controller
      */
     public function report(LotteryRequest $request)
     {
-        // $lotteryCode = $request->input('lottery_code');
+        $lotteryCode = $request->input('lottery_code');
         $values = array();
         try {
-            $values = Redis::keys('lottery:*:*');
+            if (is_null($lotteryCode)) {
+                $values = Redis::keys('lottery:*:*');
+            }
+            else {
+                $values = Redis::keys('lottery:*:'.$lotteryCode);
+            }
         } catch (\Throwable $exception) {
             // throw $exception;
             return response(['error' => 

@@ -2,12 +2,22 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-8">
-                <div class="overflow-auto">
+                <div class="overflow">
+                    <legend>Winners Report Form</legend>
+                    <div class="form-group row">
+                        <label for="InputCode" class="col-sm-2 col-form-label">Lottery code:</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control-plaintext" id="InputCode" placeholder=" Input your lottery code here.">
+                        </div>
+                    </div>
+                    <button v-on:click="clicked2" type="button" class="btn btn-primary">Get Report</button> 
+                    <br/>
+                    <br/>
                     <p class="mt-3">Current Page: {{ currentPage }}</p>
                     <b-table
                         id="my-table"
                         ref="table"
-                        :items="clicked2"
+                        :items="items"
                         :per-page="perPage"
                         :current-page="currentPage"
                         small
@@ -18,8 +28,7 @@
                         :total-rows="rows"
                         :per-page="perPage2"
                         aria-controls="my-table"
-                    ></b-pagination>
-                    <button v-on:click="clicked2" type="button" class="btn btn-primary">Key Generator</button> -->
+                    ></b-pagination>-->
                 </div>
 
             </div>
@@ -63,24 +72,20 @@
         methods: {
             clicked2(ctx) {
                 console.log(ctx.currentPage + '&size=' + ctx.perPage)
+                var inpCode = document.getElementById("InputCode").value;
+                var reqBody = {'lottery_code': inpCode}
                 var self = this     
                 let items = self.items
-                let promise = axios.post('http://127.0.0.1:8000/api/admin/winners/report', { withCredentials: true })
+                let promise = axios.post('http://127.0.0.1:8000/api/admin/winners/report', reqBody, { withCredentials: true })
                 return promise.then((data) => {
                     const items = data.data.data
                     console.log(items)
-                    // Here we could override the busy state, setting isBusy to false
-                    // this.isBusy = false
-                    // perPage2()
+                    self.items = items
+                    self.$store.commit('saveReportItems',   
+                            self.items);
                     this.$refs.table.refresh()
-                    let pp = this.perPage
-                    console.log(pp)
                     return(items)
                 }).catch(error => {
-                     // Here we could override the busy state, setting isBusy to false
-                    // this.isBusy = false
-                    // Returning an empty array, allows table to correctly handle
-                    // internal busy state in case of error
                     return []
                 })
             },
@@ -101,9 +106,7 @@
             clicked5() {
                 console.log('hereee')
                 // self = this
-                let items = []  
-                self.$store.commit('saveCurrentPageNo',   
-                            this.currentPage);
+                
             }
         },
         mounted () {
