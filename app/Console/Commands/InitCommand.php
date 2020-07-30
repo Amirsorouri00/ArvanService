@@ -84,6 +84,7 @@ class InitCommand extends Command
             return;
         }
         $this->comment('Done.');
+        $this->comment('Run "0.php artisan key:generate"');
         $this->comment('Run "1.php artisan serve"');
         $this->comment('Run "2.open the link just showed up at the browser."');
         $this->comment('Run "3.Register a new user and enjoy ArvanService."');
@@ -139,12 +140,12 @@ class InitCommand extends Command
                 'mysql' => 'MySQL/MariaDB',
                 'pgsql' => 'PostgreSQL',
                 'sqlsrv' => 'SQL Server',
-                'sqlite' => 'SQLite',
+                'sqlite-e2e' => 'SQLite',
             ],
             'mysql'
         );
 
-        if ($config['DB_CONNECTION'] === 'sqlite') {
+        if ($config['DB_CONNECTION'] === 'sqlite-e2e') {
             $config['DB_DATABASE'] = $this->ask('Absolute path to the DB file recommended(home/{username}/../ArvanService/database/AbrDB.db): ');
             $config['DB_FOREIGN_KEYS'] = 'true';
         } else {
@@ -153,10 +154,9 @@ class InitCommand extends Command
             $config['DB_DATABASE'] = $this->anticipate('DB name', ['arvan']);
             $config['DB_USERNAME'] = $this->anticipate('DB user', ['arvan']);
             $config['DB_PASSWORD'] = (string) $this->ask('DB password');
-            
         }
         $config['CACHE_DRIVER'] = 'redis';
-        $config['LOG_CHANNEL=stack'] = 'stack';
+        $config['LOG_CHANNEL'] = 'stack';
         foreach ($config as $key => $value) {
             $this->dotenvEditor->setKey($key, $value);
         }
