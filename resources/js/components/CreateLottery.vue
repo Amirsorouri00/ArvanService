@@ -10,7 +10,6 @@
                             <form class="form-group has-success" >
                                 <label class="form-control-label" for="inputSuccess1">Lottery Capacity</label>
                                 <input type="number" value="correct value" class="form-control" id="capacity" required>
-                                <!-- <input type="text" value="correct value" class="form-control is-valid" id="inputValid"> -->
                                 <div id="demo" class="in-valid-feedback"></div>
                             </form>
                             <button v-on:click="clicked" type="button" class="btn btn-primary">Key Generator</button>
@@ -64,12 +63,10 @@
                         self.message = message.data.code
                         self.$store.commit('saveLotteryCode',   
                             self.message);
-                        // self.$state.mutations.saveLotteryCode(self.message)
                         console.log('message', message, self.message)
                     })
                     .catch(function (error) {
                         // handle error
-                        // this.message = message
                         console.log(error);
                     })
                     .then(function () {
@@ -77,11 +74,6 @@
                         console.log('then')
                     });
                     console.log("clicked")
-                    // let message = this.rndStr(20)
-                    // let tmp = this.message
-                    // this.message = message
-                    // console.log(message, tmp, this.message)
-                    
                 }
                 
             }

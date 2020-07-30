@@ -35,7 +35,8 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav mr-auto">
-                       
+                    @guest
+                    @else
                         <li class="nav-item">
                             <router-link class="nav-link" to="/createlottery">1.CreateLottery</router-link>
                         </li>
@@ -45,6 +46,7 @@
                         <li class="nav-item">
                             <router-link class="nav-link" to="/winnersreport">3.WinnersReport</router-link>
                         </li>
+                        @endguest
                     </ul>
 
                     <!-- Right Side Of Navbar -->

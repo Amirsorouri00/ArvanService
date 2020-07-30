@@ -1,7 +1,6 @@
 import Vue from "vue";
 import Vuex from "vuex";
 
-// Vue.use(VueRouter)
 Vue.use(Vuex);
 Vue.config.silent = true
 
@@ -23,8 +22,5 @@ export default new Vuex.Store({
             {state.generatedCode = code;},
         saveReportItems: (state, items) => 
             {state.reportItems = items;},
-        saveCurrentPageNo: (state, pageNo) => 
-            {state.paginationPageNo = pageNo;}
-
     }
 });
