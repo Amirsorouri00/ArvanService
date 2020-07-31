@@ -80,7 +80,6 @@ class LotteryUserController extends Controller
             $endTime = microtime(true);
             $lock = Cache::lock('attendees', 1);
             try {
-                //code...
                 $lock->block(34);
                 if(Redis::get($lotteryCode) > 0) {
                     try {
